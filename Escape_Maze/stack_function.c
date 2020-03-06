@@ -75,7 +75,7 @@ int** Make_map()
 
 	temp = (int**)malloc(size * sizeof(int*));
 	for (size_j = 0; size_j < size; size_j++)
-		temp[size_j] = (int*)malloc(size*sizeof(int));
+		temp[size_j] = (int*)malloc(size * sizeof(int));
 
 	for (i = 0; i < size; i++)
 	{
@@ -93,7 +93,7 @@ int** Make_map()
 				Wall_Road = 0;
 				zero_cnt++;
 			}
-	
+
 			temp[i][j] = Wall_Road;
 		}
 	}
@@ -112,16 +112,16 @@ int** Make_map()
 			break;
 		}
 	}
-	
+
 	while (1)
 	{
 		Rand_Goal.Point.i = rand() % size;
 		Rand_Goal.Point.j = rand() % size;
 
-		if (temp[Rand_Goal.Point.i][Rand_Goal.Point.j]==0 && temp[Rand_Goal.Point.i][Rand_Goal.Point.j] != 2)
+		if (temp[Rand_Goal.Point.i][Rand_Goal.Point.j] == 0 && temp[Rand_Goal.Point.i][Rand_Goal.Point.j] != 2)
 		{
 			temp[Rand_Goal.Point.i][Rand_Goal.Point.j] = 3;
-			break; 
+			break;
 		}
 
 	}
@@ -161,6 +161,20 @@ void Maze_Print_out(int **map)
 		printf("\n");
 	}
 }
+//갈림길 판단 방법?
+//경계값을 잘 확인 할 것
+//벽인 값을 잘 확인 할 것
+Point Move_Point(int ***map, Point Start, int i, int j)
+{
+	int Boundary;
+	Boundary = _msize(*map) / sizeof(int*);
+	//(*map)[Start.i][Start.j]
+	(*map)[Start.i][Start.j] = 0;
+	(*map)[Start.i + i][Start.j + j] = 2;
+
+	return Start;
+}
+
 
 void clear_buf()//버퍼 비우기
 {

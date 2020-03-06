@@ -13,6 +13,7 @@ int Count_stack();
 /*ESCAPE_MAZE_GAME*/
 int** Make_map();
 void Maze_Print_out(int **map);
+Point Move_Point(int ***map, Point Start, int i, int j);
 /*Simple Function*/
 char* get_string_return_ptr();
 void clear_buf();

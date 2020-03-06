@@ -16,10 +16,10 @@ int main()
 	map_size = _msize(map) / sizeof(int*);
 	Goal = Pop_stack();
 	Start = Pop_stack();
-
 	Maze_Print_out(map);
-
-	
+	puts("");
+	Start = Move_Point(&map, Start, 1, 1);
+	Maze_Print_out(map);
 
 	system("pause");
 }
