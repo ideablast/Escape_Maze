@@ -12,7 +12,7 @@ int IsEmpty();
 int Count_stack();
 /*ESCAPE_MAZE_GAME*/
 int** Make_map();
-void Make_road(int***map);
+void Maze_Print_out(int **map);
 /*Simple Function*/
 char* get_string_return_ptr();
 void clear_buf();

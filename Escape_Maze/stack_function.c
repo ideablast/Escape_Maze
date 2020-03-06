@@ -65,20 +65,101 @@ int** Make_map()
 	int size = rand() % 4 + 7;
 	int size_j;
 	int i, j;
+	int Wall_Road;
+	Stack Rand_Start;
+	Stack Rand_Goal;
+
 	int cnt = 0;
+	int zero_cnt = 0;
+	int one_cnt = 0;
 
 	temp = (int**)malloc(size * sizeof(int*));
 	for (size_j = 0; size_j < size; size_j++)
-		temp[size_j] = (int*)malloc(sizeof(int));
+		temp[size_j] = (int*)malloc(size*sizeof(int));
+
+	for (i = 0; i < size; i++)
+	{
+		for (j = 0; j < size; j++)
+		{
+			Wall_Road = rand() % 10;
+
+			if (Wall_Road < 3)
+			{
+				Wall_Road = 1;
+				one_cnt++;
+			}
+			else
+			{
+				Wall_Road = 0;
+				zero_cnt++;
+			}
+	
+			temp[i][j] = Wall_Road;
+		}
+	}
+
+	printf("0비율:%lf\n", zero_cnt / (double)(size*size));
+	printf("1비율:%lf\n", one_cnt / (double)(size*size));
+
+	while (1)
+	{
+		Rand_Start.Point.i = rand() % size;
+		Rand_Start.Point.j = rand() % size;
+
+		if (temp[Rand_Start.Point.i][Rand_Start.Point.j] == 0)
+		{
+			temp[Rand_Start.Point.i][Rand_Start.Point.j] = 2;
+			break;
+		}
+	}
+	
+	while (1)
+	{
+		Rand_Goal.Point.i = rand() % size;
+		Rand_Goal.Point.j = rand() % size;
+
+		if (temp[Rand_Goal.Point.i][Rand_Goal.Point.j]==0 && temp[Rand_Goal.Point.i][Rand_Goal.Point.j] != 2)
+		{
+			temp[Rand_Goal.Point.i][Rand_Goal.Point.j] = 3;
+			break; 
+		}
+
+	}
+
+	Push_stack(Rand_Start.Point.i, Rand_Start.Point.j);
+	Push_stack(Rand_Goal.Point.i, Rand_Goal.Point.j);
 
 	return temp;
 }
 
-void Make_road(int***map)
+//-1:초기화 0□:길 1■:벽 2★:시작 3♥:도착
+void Maze_Print_out(int **map)
 {
-	int size = _msize(map) / sizeof(int*);
+	int i, j;
+	int map_size = _msize(map) / sizeof(int*);
 
-
+	for (i = 0; i < map_size; i++)
+	{
+		for (j = 0; j < map_size; j++)
+		{
+			switch (map[i][j])
+			{
+			case 0:
+				printf("□");
+				break;
+			case 1:
+				printf("■");
+				break;
+			case 2:
+				printf("★");
+				break;
+			case 3:
+				printf("♥");
+				break;
+			}
+		}
+		printf("\n");
+	}
 }
 
 void clear_buf()//버퍼 비우기
@@ -127,3 +208,14 @@ char* get_string_return_ptr()//문자열의 길이에 따라서 능동적으로 배열의 할당 메�
 	//malloc는 7바이트 해줘야함
 	return temp;
 }
+
+#ifdef NOTYET
+Point Stack_to_Point(Stack temp)
+{
+	Point P_temp;
+	P_temp.i = temp.Point.i;
+	P_temp.j = temp.Point.j;
+
+	return P_temp;
+}
+#endif
