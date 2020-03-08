@@ -1,8 +1,9 @@
 #include"ALL.h"
 
 extern Stack *top;
+extern Point Start;
+extern Point Goal;
 /*BASIC_STACK*/
-
 Stack* Add_new_stack()
 {
 	Stack *temp = (Stack*)malloc(sizeof(Stack));
@@ -14,11 +15,11 @@ Stack* Add_new_stack()
 	return temp;
 }
 
-void Push_stack(int i, int j)
+void Push_stack(Point P_temp)
 {
 	Stack *temp = Add_new_stack();
-	temp->Point.i = i;
-	temp->Point.j = j;
+	temp->Point.i = P_temp.i;
+	temp->Point.j = P_temp.j;
 
 	temp->Link = top->Link;
 	top->Link = temp;
@@ -66,8 +67,6 @@ int** Make_map()
 	int size_j;
 	int i, j;
 	int Wall_Road;
-	Stack Rand_Start;
-	Stack Rand_Goal;
 
 	int cnt = 0;
 	int zero_cnt = 0;
@@ -103,36 +102,33 @@ int** Make_map()
 
 	while (1)
 	{
-		Rand_Start.Point.i = rand() % size;
-		Rand_Start.Point.j = rand() % size;
+		Start.i = rand() % size;
+		Start.j = rand() % size;
 
-		if (temp[Rand_Start.Point.i][Rand_Start.Point.j] == 0)
+		if (temp[Start.i][Start.j] == 0)
 		{
-			temp[Rand_Start.Point.i][Rand_Start.Point.j] = 2;
+			temp[Start.i][Start.j] = 2;
 			break;
 		}
 	}
 
 	while (1)
 	{
-		Rand_Goal.Point.i = rand() % size;
-		Rand_Goal.Point.j = rand() % size;
+		Goal.i = rand() % size;
+		Goal.j = rand() % size;
 
-		if (temp[Rand_Goal.Point.i][Rand_Goal.Point.j] == 0 && temp[Rand_Goal.Point.i][Rand_Goal.Point.j] != 2)
+		if (temp[Goal.i][Goal.j] == 0 && temp[Goal.i][Goal.j] != 2)
 		{
-			temp[Rand_Goal.Point.i][Rand_Goal.Point.j] = 3;
+			temp[Goal.i][Goal.j] = 3;
 			break;
 		}
 
 	}
 
-	Push_stack(Rand_Start.Point.i, Rand_Start.Point.j);
-	Push_stack(Rand_Goal.Point.i, Rand_Goal.Point.j);
-
 	return temp;
 }
 
-//-1:초기화 0□:길 1■:벽 2★:시작 3♥:도착
+//-1:초기화 0□:길 1■:벽 2★:시작 3♥:도착 4:이미 한번 지나간 길
 void Maze_Print_out(int **map)
 {
 	int i, j;
@@ -156,6 +152,9 @@ void Maze_Print_out(int **map)
 			case 3:
 				printf("♥");
 				break;
+			case 4:
+				printf("▩");
+				break;
 			}
 		}
 		printf("\n");
@@ -164,72 +163,150 @@ void Maze_Print_out(int **map)
 //갈림길 판단 방법?
 //경계값을 잘 확인 할 것
 //벽인 값을 잘 확인 할 것
-Point Move_Point(int ***map, Point Start, int i, int j)
+void Move_Point(int ***map, int set, Point temp)
 {
-	int Boundary;
-	Boundary = _msize(*map) / sizeof(int*);
-	//(*map)[Start.i][Start.j]
-	(*map)[Start.i][Start.j] = 0;
-	(*map)[Start.i + i][Start.j + j] = 2;
-
-	return Start;
-}
-
-
-void clear_buf()//버퍼 비우기
-{
-	while (getchar() != '\n');
-}
-char* get_string_return_ptr()//문자열의 길이에 따라서 능동적으로 배열의 할당 메모리를 조절하여 입력받는 함수
-{
-	//이 방식이 좀더 안정적일것 같은 느낌적인 느낌?
-	//받아서 쓰는 방식이 좋을까 
-	//내부에서 입력 받은 것을 리턴하는 방식이 좋을까?
-
-	char *temp;
-	unsigned int str_len = 2;//문자열의 길이 정보를 저장하고 있는 배열
-	char ch = 0;
-	unsigned int cnt = 0;
-
-
-	temp = (char*)malloc(str_len * sizeof(char));
-
-	while (ch != '\n')//입력 받은 문자가 엔터이면 바로 루프 탈출
+	if (set == 4)
 	{
-		if (str_len > cnt)
-		{
-			ch = getchar();
-			temp[cnt] = ch;
-			cnt++;
-		}
+		(*map)[Start.i][Start.j] = set;
+		(*map)[temp.i][temp.j] = 2;
+	}
+	else
+	{
+		Push_stack(Start);
+		(*map)[Start.i][Start.j] = set;
+		(*map)[temp.i][temp.j] = 2;
+	}
+	
+	Start = temp;
+}
 
+int Boundary_decter(int ***map, Point temp)
+{
+	int Boundary = _msize(*map) / sizeof(int*);
+	int result;
+
+	if (!((temp.i) >= 0 && (temp.i) < Boundary))//경계값을 넘어가는 경우
+		result = FALSE;
+	else//경계값 이내에 있는 값인 경우
+	{
+		if (!(temp.j >= 0 &&temp.j < Boundary))
+			result = FALSE;
 		else
-		{
-			str_len += 5;
-			temp = (char*)realloc(temp, (str_len) * sizeof(char));
-		}
+			result = TRUE;
 	}
 
-	temp[cnt - 1] = '\0';
-	str_len = strlen(temp);
-	temp = (char*)realloc(temp, (str_len + 1) * sizeof(char));//엔터를 입력받은 경우에는 1바이트 메모리 할당
-
-	cnt = 0;
-	ch = 0;
-	//정확하게 문자열의 형태로 저장
-	//예를 들어 [123456\0]을 입력했으면 메모리 7바이트가 리턴
-	//strlen시 6리턴
-	//malloc는 7바이트 해줘야함
-	return temp;
+	return result;
 }
 
-#ifdef NOTYET
-Point Stack_to_Point(Stack temp)
+int Wall_decter(int ***map,  Point temp)
 {
-	Point P_temp;
-	P_temp.i = temp.Point.i;
-	P_temp.j = temp.Point.j;
+	int result;
 
-	return P_temp;
+	if (Boundary_decter(map, temp) == TRUE)
+	{
+		if ((*map)[temp.i][temp.j] != 1)
+			result = TRUE;//벽이 아님->갈 수 있는 길
+		else
+			result = FALSE;
+	}
+	else//경계값 벗어나는 경우
+		result = FALSE;
+
+	return result;
 }
-#endif
+
+int Is_already_passed(int ***map, Point temp)
+{
+	int result;
+
+	if ((*map)[temp.i][temp.j] != 4)
+		result = TRUE;
+	else
+		result = FALSE;
+
+	return result;
+}
+
+double Distance_calculator(Point temp)
+{
+	return sqrt(pow((temp.i - Goal.i), 2) + pow((temp.j - Goal.j), 2));
+}
+
+int Path_selecter(int ***map)
+{
+	Point dir_ary[4] = { {Start.i, Start.j -1 } ,{ Start.i -1,Start.j },{ Start.i,Start.j+ 1 },{ Start.i +1, Start.j } };
+	int i;
+	int result_ary[4];
+	int min_idx;
+	double distance_result[4];
+	Point temp;
+	int break_signal;
+	int result_false_cnt = 0;
+	static int path_flag = 0;
+	
+	for (i = 0; i < 4; i++)
+		result_ary[i] = Wall_decter(map, dir_ary[i])&&Is_already_passed(map, dir_ary[i]);
+
+	for (i = 0; i < 4; i++)
+	{
+		if (result_ary[i] == TRUE)//결과값이 참인 경우에만 거리를 계산
+			distance_result[i] = Distance_calculator(dir_ary[i]);
+
+		else
+			distance_result[i] = 20;
+	}
+
+	for (i = 0; i < 4; i++)
+	{
+		if (result_ary[i] == FALSE)
+			result_false_cnt++;
+
+		if (result_false_cnt == 4)
+			break_signal = FALSE;
+	}
+
+	min_idx = 0;
+	for (i = 0; i < 4; i++)
+	{
+		if (distance_result[i] < distance_result[min_idx])
+			min_idx = i;
+	}//거리의 최소값을 가진 인덱스를 탐색
+
+	if (IsEmpty() == FALSE)
+	{
+		temp = Pop_stack();
+		if ((temp.i == dir_ary[min_idx].i) && (temp.j == dir_ary[min_idx].j))
+		{
+
+			if (path_flag == 1)
+			{
+				path_flag = 0;
+				Move_Point(map, 4, temp);
+			}
+			else
+			{
+				distance_result[min_idx] = 20;
+				min_idx = 0;
+				for (i = 0; i < 4; i++)//20인 인덱스의 갯수 세서 규칙 만들기
+				{
+					if (distance_result[i] < distance_result[min_idx])
+						min_idx = i;
+				}//거리의 최소값을 가진 인덱스를 탐색
+				Move_Point(map, 0, dir_ary[min_idx]);//현재 위치를 지나온 길로 표시하고 
+				path_flag++;
+			}
+
+		}
+			
+		else
+		{
+			Push_stack(temp);
+			Move_Point(map, 0,dir_ary[min_idx]);
+		}
+	}
+	else
+		Move_Point(map, 0, dir_ary[min_idx]);
+
+
+	return break_signal;
+}

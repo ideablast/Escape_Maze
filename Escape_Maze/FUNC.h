@@ -6,16 +6,19 @@
 
 /*BASIC_STACK*/
 Stack* Add_new_stack();
-void Push_stack(int i, int j);
+void Push_stack(Point P_temp);
 Point Pop_stack();
 int IsEmpty();
 int Count_stack();
 /*ESCAPE_MAZE_GAME*/
 int** Make_map();
 void Maze_Print_out(int **map);
-Point Move_Point(int ***map, Point Start, int i, int j);
-/*Simple Function*/
-char* get_string_return_ptr();
-void clear_buf();
+void Move_Point(int ***map, int set, Point temp);
+int Boundary_decter(int ***map, Point temp);
+int Wall_decter(int ***map, Point temp);
+double Distance_calculator(Point temp);
+int Path_selecter(int ***map);
+int Is_already_passed(int ***map, Point temp);
+
 #endif
 

@@ -1,6 +1,8 @@
 #include"ALL.h"
 
 Stack *top;
+Point Start;
+Point Goal;
 
 int main()
 {
@@ -9,17 +11,37 @@ int main()
 	//int i, j;
 	int cnt = 0;
 	int map_size;
-	Point Start;
-	Point Goal;
+	int break_signal;
+
 	top = Add_new_stack();
 	map = Make_map();
 	map_size = _msize(map) / sizeof(int*);
-	Goal = Pop_stack();
-	Start = Pop_stack();
+	puts("게임 시작");
 	Maze_Print_out(map);
+	system("pause");
+	system("cls");
 	puts("");
-	Start = Move_Point(&map, Start, 1, 1);
-	Maze_Print_out(map);
+	while (1)
+	{
+		break_signal = Path_selecter(&map);
+		Maze_Print_out(map);
+		system("pause");
+		system("cls");
+
+		if (break_signal == FALSE)
+		{
+			puts("탈출 실패!");
+			break;
+		}
+
+		if (Start.i == Goal.i&&Start.j == Goal.j)
+		{
+			puts("탈출 성공!");
+			break;
+		}
+	}
+
+	
 
 	system("pause");
 }
