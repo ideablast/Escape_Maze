@@ -18,7 +18,8 @@ int Boundary_decter(int ***map, Point temp);
 int Wall_decter(int ***map, Point temp);
 double Distance_calculator(Point temp);
 int Path_selecter(int ***map);
+int Path_selecter_new(int ***map);
 int Is_already_passed(int ***map, Point temp);
-
+int result_false_cnt(int *result_ary);
 #endif
 

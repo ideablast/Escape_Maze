@@ -3,6 +3,7 @@
 extern Stack *top;
 extern Point Start;
 extern Point Goal;
+extern Point Past_point;
 /*BASIC_STACK*/
 Stack* Add_new_stack()
 {
@@ -226,6 +227,20 @@ int Is_already_passed(int ***map, Point temp)
 
 	return result;
 }
+int result_false_cnt(int *result_ary)
+{
+	int cnt = 0;
+	int i;
+
+	for (i = 0; i < 4; i++)
+	{
+		if (result_ary[i] == FALSE)
+			cnt++;
+	}
+
+	return cnt;
+}
+
 
 double Distance_calculator(Point temp)
 {
@@ -240,12 +255,15 @@ int Path_selecter(int ***map)
 	int min_idx;
 	double distance_result[4];
 	Point temp;
+	Point Cur_Point;
 	int break_signal;
-	int result_false_cnt = 0;
-	static int path_flag = 0;
+	int false_cnt = 0;
+	int true_cnt;
 	
+	Cur_Point = Start;
+
 	for (i = 0; i < 4; i++)
-		result_ary[i] = Wall_decter(map, dir_ary[i])&&Is_already_passed(map, dir_ary[i]);
+		result_ary[i] = Wall_decter(map, dir_ary[i]) && Is_already_passed(map, dir_ary[i]);
 
 	for (i = 0; i < 4; i++)
 	{
@@ -256,14 +274,10 @@ int Path_selecter(int ***map)
 			distance_result[i] = 20;
 	}
 
-	for (i = 0; i < 4; i++)
-	{
-		if (result_ary[i] == FALSE)
-			result_false_cnt++;
-
-		if (result_false_cnt == 4)
-			break_signal = FALSE;
-	}
+	true_cnt = (4 - result_false_cnt(result_ary));
+	if(true_cnt == 2)
+	if (result_false_cnt(result_ary) == 4)
+		break_signal = FALSE;
 
 	min_idx = 0;
 	for (i = 0; i < 4; i++)
@@ -277,24 +291,27 @@ int Path_selecter(int ***map)
 		temp = Pop_stack();
 		if ((temp.i == dir_ary[min_idx].i) && (temp.j == dir_ary[min_idx].j))
 		{
-
+			/*
 			if (path_flag == 1)
 			{
-				path_flag = 0;
-				Move_Point(map, 4, temp);
+			path_flag = 0;
+			Move_Point(map, 4, temp);
 			}
 			else
 			{
-				distance_result[min_idx] = 20;
-				min_idx = 0;
-				for (i = 0; i < 4; i++)//20인 인덱스의 갯수 세서 규칙 만들기
-				{
-					if (distance_result[i] < distance_result[min_idx])
-						min_idx = i;
-				}//거리의 최소값을 가진 인덱스를 탐색
-				Move_Point(map, 0, dir_ary[min_idx]);//현재 위치를 지나온 길로 표시하고 
-				path_flag++;
+			distance_result[min_idx] = 20;
+			min_idx = 0;
+			for (i = 0; i < 4; i++)//20인 인덱스의 갯수 세서 규칙 만들기
+			{
+			if (distance_result[i] < distance_result[min_idx])
+			min_idx = i;
+			}//거리의 최소값을 가진 인덱스를 탐색
+			Move_Point(map, 0, dir_ary[min_idx]);//현재 위치를 지나온 길로 표시하고
+			path_flag++;
 			}
+			*/
+
+			
 
 		}
 			
@@ -307,6 +324,73 @@ int Path_selecter(int ***map)
 	else
 		Move_Point(map, 0, dir_ary[min_idx]);
 
+
+	return break_signal;
+}
+void break_already_passed(int ***map)
+{
+	Point dir_ary[8] = { { Start.i, Start.j - 1 } ,{ Start.i - 1, Start.j - 1 },{ Start.i-1,Start.j },{ Start.i + 1, Start.j } };
+
+}
+
+int Path_selecter_new(int ***map)//Start, Goal은 항상 알고 있는 정보
+{
+	//앞으로 길을 선택할 기준: 골과의 좌표상 거리
+	//특정 좌표가 정해지면 항상 계산해줘야 하는 정보
+	int i;
+	int false_cnt = 0;
+	int true_cnt;
+	int min_idx;
+	int break_signal = FALSE;
+
+	Point dir_ary[4] = { { Start.i, Start.j - 1 } ,{ Start.i - 1,Start.j },{ Start.i,Start.j + 1 },{ Start.i + 1, Start.j } };
+	int result_ary[4];
+	double distance_result[4];
+
+	//경계값 및 벽을 고르는 경우를 제외
+	for (i = 0; i < 4; i++)
+		result_ary[i] = Wall_decter(map, dir_ary[i]) && Is_already_passed(map, dir_ary[i]);
+
+	//거리 계산
+	for (i = 0; i < 4; i++)
+	{
+		if (result_ary[i] == TRUE)//결과값이 참인 경우에만 거리를 계산
+			distance_result[i] = Distance_calculator(dir_ary[i]);
+
+		else
+			distance_result[i] = 20;//랜덤으로 만들어진 맵의 최대 거리
+	}
+
+	false_cnt = result_false_cnt(result_ary);
+	true_cnt = (4 - false_cnt);
+
+	//지나온 길을 제외한 선택지가 2가지인 경우에 현재 위치 Push
+	if (true_cnt == 2)
+		Push_stack(Start);
+
+	if (false_cnt == 4)
+	{
+		if (IsEmpty() == FALSE)
+			Move_Point(map, 4, Pop_stack());
+		else
+		{
+
+			break_signal = TRUE;
+		}
+			
+	}
+	else
+	{
+		min_idx = 0;
+		for (i = 0; i < 4; i++)
+		{
+			if (distance_result[i] < distance_result[min_idx])
+				min_idx = i;
+		}//거리의 최소값을 가진 인덱스를 탐색
+
+		Move_Point(map, 4, dir_ary[min_idx]);
+	}
+	
 
 	return break_signal;
 }

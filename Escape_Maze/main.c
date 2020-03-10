@@ -3,6 +3,7 @@
 Stack *top;
 Point Start;
 Point Goal;
+Point Past_point;
 
 int main()
 {
@@ -19,16 +20,17 @@ int main()
 	puts("게임 시작");
 	Maze_Print_out(map);
 	system("pause");
-	system("cls");
+	//system("cls");
 	puts("");
 	while (1)
 	{
-		break_signal = Path_selecter(&map);
+		
+		break_signal = Path_selecter_new(&map);
 		Maze_Print_out(map);
 		system("pause");
 		system("cls");
 
-		if (break_signal == FALSE)
+		if (break_signal == TRUE)
 		{
 			puts("탈출 실패!");
 			break;
@@ -41,7 +43,7 @@ int main()
 		}
 	}
 
-	
+
 
 	system("pause");
 }
